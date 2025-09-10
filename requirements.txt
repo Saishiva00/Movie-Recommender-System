@@ -4,4 +4,4 @@ numpy
 scikit-learn
 nltk
 seaborn
-gddown
+ggit down
