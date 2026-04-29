@@ -9,7 +9,7 @@ def download_similarity():
     url = "https://drive.google.com/file/d/1Uz2RvPeuGyr3KwdlRntQ7XvS7N2BvjRF/view?usp=drive_link"  # Google Drive file ID
     output = "similarity.pkl"
     if not os.path.exists(output):
-        gdown.download(url, output, quiet=False)
+        gdown.download(url, output, quiet=False, fuzzy =True)
     return output
 
 def recommend(movie):
