@@ -17,7 +17,7 @@ def load_data():
     # Fix for similarity.pkl — gdown v6 uses id= parameter, no fuzzy
     similarity_path = os.path.join(BASE_DIR, 'similarity.pkl')
     if not os.path.exists(similarity_path):
-        file_id = "1A-K3uSquBCTx9_3AjaJRiX-QCG5Evw1q"
+        file_id = "https://drive.google.com/file/d/1Uz2RvPeuGyr3KwdlRntQ7XvS7N2BvjRF/view?usp=sharing"
         gdown.download(id=file_id, output=similarity_path, quiet=False)
     similarity = pickle.load(open(similarity_path, 'rb'))
 
