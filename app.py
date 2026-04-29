@@ -1,42 +1,42 @@
 import streamlit as st
 import pickle
-import pandas as pd
-import gdown
 import os
+import gdown
+import pandas as pd
 
-# Function to ensure similarity.pkl is available
-def download_similarity():
-    url = "https://drive.google.com/file/d/1Uz2RvPeuGyr3KwdlRntQ7XvS7N2BvjRF/view?usp=drive_link"  # Google Drive file ID
-    output = "similarity.pkl"
-    if not os.path.exists(output):
-        gdown.download(url, output, quiet=False, fuzzy =True)
-    return output
+# Use absolute paths so it works regardless of working directory
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+@st.cache_resource
+def load_data():
+    # Fix for movies_dict.pkl — absolute path
+    movies_dict_path = os.path.join(BASE_DIR, 'movies_dict.pkl')
+    movies_dict = pickle.load(open(movies_dict_path, 'rb'))
+    movies = pd.DataFrame(movies_dict)
+
+    # Fix for similarity.pkl — gdown v6 uses id= parameter, no fuzzy
+    similarity_path = os.path.join(BASE_DIR, 'similarity.pkl')
+    if not os.path.exists(similarity_path):
+        file_id = "1A-K3uSquBCTx9_3AjaJRiX-QCG5Evw1q"
+        gdown.download(id=file_id, output=similarity_path, quiet=False)
+    similarity = pickle.load(open(similarity_path, 'rb'))
+
+    return movies, similarity
+
+movies, similarity = load_data()
 
 def recommend(movie):
-    movie_index = movies[movies['title'] == movie].index[0]
-    distances = similarity[movie_index]
-    movies_list = sorted(list(enumerate(distances)), reverse=True, key=lambda x: x[1])[1:6]
-
+    idx = movies[movies['title'] == movie].index[0]
+    distances = sorted(list(enumerate(similarity[idx])), reverse=True, key=lambda x: x[1])
     recommended_movies = []
-    for i in movies_list:
+    for i in distances[1:6]:
         recommended_movies.append(movies.iloc[i[0]].title)
     return recommended_movies
 
-# Load movies dict
-movies_dict = pickle.load(open('movies_dict.pkl', 'rb'))
-movies = pd.DataFrame(movies_dict)
-
-# Ensure similarity.pkl is present
-similarity_file = download_similarity()
-similarity = pickle.load(open(similarity_file, 'rb'))
-
-# Streamlit UI
 st.title('🎬 Movie Recommender System')
+selected_movie = st.selectbox('Select a movie', movies['title'].values)
 
-selected_movie_name = st.selectbox("Choose a movie you like:", movies['title'].values)
-
-if st.button('Recommend'):
-    recommendations = recommend(selected_movie_name)
-    st.subheader("Recommended Movies:")
-    for i in recommendations:
-        st.write(i)
+if st.button('Show Recommendation'):
+    recommendations = recommend(selected_movie)
+    for movie in recommendations:
+        st.write(movie)
